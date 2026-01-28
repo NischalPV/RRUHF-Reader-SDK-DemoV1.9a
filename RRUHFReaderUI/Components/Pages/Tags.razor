@@ -1,0 +1,63 @@
+@page "/tags"
+@inject RRUHFReaderUI.Services.ReaderApiService ApiService
+@rendermode InteractiveServer
+
+<PageTitle>Tags</PageTitle>
+
+<h1 class="mb-4">RFID Tags</h1>
+
+<button class="btn btn-primary mb-3" @onclick="LoadTags">🔄 Refresh</button>
+
+@if (tags == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!tags.Any())
+{
+    <div class="alert alert-info">No tags found</div>
+}
+else
+{
+    <div class="alert alert-success">Total Tags: @tags.Count</div>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>EPC</th>
+                    <th>TID</th>
+                    <th>Total Reads</th>
+                    <th>First Seen</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tag in tags.OrderByDescending(t => t.LastSeenAt))
+                {
+                    <tr>
+                        <td><code>@tag.Epc</code></td>
+                        <td>@(tag.Tid ?? "-")</td>
+                        <td><span class="badge bg-primary">@tag.TotalReadCount</span></td>
+                        <td>@tag.FirstSeenAt.ToLocalTime().ToString("g")</td>
+                        <td>@tag.LastSeenAt.ToLocalTime().ToString("g")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<RRUHFReaderUI.Models.TagDto>? tags;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTags();
+    }
+
+    private async Task LoadTags()
+    {
+        tags = await ApiService.GetTagsAsync();
+        StateHasChanged();
+    }
+}

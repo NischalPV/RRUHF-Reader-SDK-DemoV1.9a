@@ -1,0 +1,107 @@
+@page "/commands"
+@inject RRUHFReaderUI.Services.ReaderApiService ApiService
+@rendermode InteractiveServer
+
+<PageTitle>Send Commands</PageTitle>
+
+<h1 class="mb-4">Send Commands to Reader</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5>Reader Connection</h5></div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Reader IP Address</label>
+                    <input type="text" class="form-control" @bind="readerAddress" placeholder="192.168.1.100" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Port</label>
+                    <input type="number" class="form-control" @bind="port" />
+                </div>
+                
+                <h6 class="mt-4">Available Commands</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" @onclick="ConnectToReader">Connect to Reader</button>
+                    <button class="btn btn-success" @onclick="StartInventory">Start Inventory</button>
+                    <button class="btn btn-info" @onclick="GetDeviceInfo">Get Device Info</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5>Command Log</h5></div>
+            <div class="card-body" style="height: 400px; overflow-y: auto;">
+                @if (commandLog.Any())
+                {
+                    @foreach (var log in commandLog.OrderByDescending(l => l.Timestamp))
+                    {
+                        <div class="alert alert-@(log.Success ? "success" : "danger") alert-dismissible fade show" role="alert">
+                            <strong>[@log.Timestamp.ToString("HH:mm:ss")]</strong> @log.Command: @log.Message
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No commands sent yet</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string readerAddress = "192.168.1.100";
+    private int port = 8888;
+    private List<CommandLog> commandLog = new();
+
+    private record CommandLog(DateTime Timestamp, string Command, bool Success, string Message);
+
+    private async Task ConnectToReader()
+    {
+        try
+        {
+            var response = await ApiService.ConnectToReader(readerAddress, port);
+            AddLog("Connect", response?.Success ?? false, response?.Message ?? "No response");
+        }
+        catch (Exception ex)
+        {
+            AddLog("Connect", false, ex.Message);
+        }
+    }
+
+    private async Task StartInventory()
+    {
+        try
+        {
+            var response = await ApiService.SendInventoryCommand(readerAddress, port);
+            AddLog("Inventory", response?.Success ?? false, response?.Message ?? "No response");
+        }
+        catch (Exception ex)
+        {
+            AddLog("Inventory", false, ex.Message);
+        }
+    }
+
+    private async Task GetDeviceInfo()
+    {
+        try
+        {
+            var response = await ApiService.GetDeviceInfo(readerAddress, port);
+            AddLog("Device Info", response?.Success ?? false, response?.Message ?? "No response");
+        }
+        catch (Exception ex)
+        {
+            AddLog("Device Info", false, ex.Message);
+        }
+    }
+
+    private void AddLog(string command, bool success, string message)
+    {
+        commandLog.Add(new CommandLog(DateTime.Now, command, success, message));
+        if (commandLog.Count > 20) commandLog.RemoveAt(0);
+        StateHasChanged();
+    }
+}

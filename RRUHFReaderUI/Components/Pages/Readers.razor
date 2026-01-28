@@ -1,0 +1,67 @@
+@page "/readers"
+@inject RRUHFReaderUI.Services.ReaderApiService ApiService
+@rendermode InteractiveServer
+
+<PageTitle>Readers</PageTitle>
+
+<h1 class="mb-4">RFID Readers</h1>
+
+<button class="btn btn-primary mb-3" @onclick="LoadReaders">🔄 Refresh</button>
+
+@if (readers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!readers.Any())
+{
+    <div class="alert alert-info">No readers found</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Device ID</th>
+                    <th>IP Address</th>
+                    <th>Port</th>
+                    <th>Status</th>
+                    <th>First Seen</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var reader in readers)
+                {
+                    <tr>
+                        <td>@reader.DeviceId</td>
+                        <td>@reader.IpAddress</td>
+                        <td>@reader.Port</td>
+                        <td>
+                            <span class="badge bg-@(reader.IsActive ? "success" : "secondary")">
+                                @(reader.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td>@reader.FirstSeenAt.ToLocalTime().ToString("g")</td>
+                        <td>@reader.LastSeenAt.ToLocalTime().ToString("g")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<RRUHFReaderUI.Models.ReaderDto>? readers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReaders();
+    }
+
+    private async Task LoadReaders()
+    {
+        readers = await ApiService.GetReadersAsync();
+        StateHasChanged();
+    }
+}

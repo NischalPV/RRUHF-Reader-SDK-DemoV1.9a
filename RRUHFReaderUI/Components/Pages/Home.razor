@@ -1,0 +1,104 @@
+@page "/"
+@inject RRUHFReaderUI.Services.ReaderApiService ApiService
+
+<PageTitle>RRUHF Reader Control</PageTitle>
+
+<h1 class="mb-4">RRUHF Reader Control Panel</h1>
+
+@if (stats != null)
+{
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">@stats.TotalReaders</h5>
+                    <p class="card-text">Total Readers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">@stats.ActiveReaders</h5>
+                    <p class="card-text">Active Readers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">@stats.TotalTags</h5>
+                    <p class="card-text">Total Tags</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">@stats.TotalTransactions</h5>
+                    <p class="card-text">Total Transactions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">@stats.RecentTransactions</h5>
+                    <p class="card-text">Last Hour</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5>Quick Actions</h5></div>
+            <div class="card-body">
+                <a href="/commands" class="btn btn-primary btn-lg btn-block mb-2">📡 Send Commands</a>
+                <a href="/readers" class="btn btn-secondary btn-lg btn-block mb-2">📊 View Readers</a>
+                <a href="/tags" class="btn btn-success btn-lg btn-block mb-2">🏷️ View Tags</a>
+                <a href="/transactions" class="btn btn-info btn-lg btn-block">📈 View Transactions</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5>About</h5></div>
+            <div class="card-body">
+                <p>RRUHF Reader Control System allows you to:</p>
+                <ul>
+                    <li>Connect to RFID readers via TCP/IP</li>
+                    <li>Send commands to start inventory, get device info</li>
+                    <li>View real-time tag detection data</li>
+                    <li>Monitor reader status and statistics</li>
+                </ul>
+                <p class="text-muted">Make sure the backend API and reader service are running.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RRUHFReaderUI.Models.StatsSummary? stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStats();
+    }
+
+    private async Task LoadStats()
+    {
+        try
+        {
+            stats = await ApiService.GetStatsSummaryAsync();
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+            // Handle silently for now
+        }
+    }
+}
