@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RRUHF Reader SDK Demo", "RRUHF Reader SDK Demo.csproj", "{22B109D2-D6F4-4726-BEA8-BD05C99FF561}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22B109D2-D6F4-4726-BEA8-BD05C99FF561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22B109D2-D6F4-4726-BEA8-BD05C99FF561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22B109D2-D6F4-4726-BEA8-BD05C99FF561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22B109D2-D6F4-4726-BEA8-BD05C99FF561}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C0A3D817-C90E-4149-8C6E-87EEBF487B4F}
+	EndGlobalSection
+EndGlobal
