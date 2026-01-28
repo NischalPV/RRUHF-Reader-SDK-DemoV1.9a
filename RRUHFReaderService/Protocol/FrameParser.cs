@@ -21,6 +21,12 @@ public class FrameParser
                 if (_idx == 0)
                 {
                     _packetLength = b;
+                    // Validate packet length to prevent buffer overflow
+                    if (_packetLength > 4090) // Leave room for header/CRC
+                    {
+                        _frameBeginFlag = false;
+                        continue;
+                    }
                 }
 
                 if (_idx == _packetLength + 2)
@@ -68,6 +74,7 @@ public class FrameParser
             byte flags = rxFrame[idx];
             bool isWithUid = (flags & 0x01) == 0x01;
             bool isWithTid = (flags & 0x02) == 0x02;
+            // TID-only mode: TID field is present but not UID, so TID should be used as the identifier
             bool isTidOnly = (flags & 0x03) == 0x02;
             bool isWithRssi = (flags & 0x04) == 0x04;
             bool isWithUserMem = (flags & 0x08) == 0x08;

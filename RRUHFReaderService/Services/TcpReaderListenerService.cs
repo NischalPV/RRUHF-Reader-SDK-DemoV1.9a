@@ -35,7 +35,14 @@ public class TcpReaderListenerService : BackgroundService
 
         try
         {
-            _listener = new TcpListener(IPAddress.Parse(host), port);
+            // Validate and parse IP address
+            if (!IPAddress.TryParse(host, out var ipAddress))
+            {
+                _logger.LogError("Invalid IP address configured: {Host}", host);
+                return;
+            }
+
+            _listener = new TcpListener(ipAddress, port);
             _listener.Start();
             _logger.LogInformation("TCP Listener started successfully");
 
@@ -53,7 +60,14 @@ public class TcpReaderListenerService : BackgroundService
                         _clients.Add(connection);
                     }
 
-                    _ = Task.Run(() => HandleClientAsync(connection, stoppingToken), stoppingToken);
+                    // Handle client in background task with proper exception handling
+                    _ = HandleClientAsync(connection, stoppingToken).ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            _logger.LogError(t.Exception, "Error in client handler for {Endpoint}", connection.Endpoint);
+                        }
+                    }, TaskScheduler.Default);
                 }
                 catch (OperationCanceledException)
                 {
@@ -171,11 +185,12 @@ public class TcpReaderListenerService : BackgroundService
             string? ipAddress = null;
             int port = 0;
             
-            var parts = endpoint.Split(':');
-            if (parts.Length == 2)
+            // Handle both IPv4 (192.168.1.1:8080) and IPv6 ([::1]:8080) formats
+            var lastColonIndex = endpoint.LastIndexOf(':');
+            if (lastColonIndex > 0)
             {
-                ipAddress = parts[0];
-                int.TryParse(parts[1], out port);
+                ipAddress = endpoint.Substring(0, lastColonIndex).Trim('[', ']');
+                int.TryParse(endpoint.Substring(lastColonIndex + 1), out port);
             }
 
             // Find or create reader

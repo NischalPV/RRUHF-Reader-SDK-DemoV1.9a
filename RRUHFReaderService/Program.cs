@@ -16,10 +16,11 @@ builder.Services.AddHostedService<TcpReaderListenerService>();
 
 var host = builder.Build();
 
-// Ensure database is created
+// Ensure database is created and migrated
 using (var scope = host.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ReaderDbContext>();
+    // For production, use migrations. For demo/development, EnsureCreated is acceptable.
     dbContext.Database.EnsureCreated();
 }
 
